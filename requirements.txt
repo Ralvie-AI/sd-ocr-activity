@@ -1,3 +1,4 @@
+altgraph==0.17.5
 antlr4-python3-runtime==4.9.3
 certifi==2026.1.4
 charset-normalizer==3.4.4
@@ -16,18 +17,23 @@ opencv-python==4.10.0.84
 openvino==2025.4.1
 openvino-telemetry==2025.2.0
 packaging==26.0
+pefile==2024.8.26
 pillow==12.1.0
 platformdirs==4.5.1
 protobuf==6.33.4
 psutil==7.2.1
 pyclipper==1.4.0
+pyinstaller==6.18.0
+pyinstaller-hooks-contrib==2026.0
 pyopencl==2026.1.2
 pyreadline3==3.5.4
 pytools==2025.2.5
 pywin32==311
+pywin32-ctypes==0.2.3
 PyYAML==6.0.3
 rapidocr==3.5.0
 requests==2.32.5
+setuptools==80.10.2
 shapely==2.1.2
 siphash24==1.8
 six==1.17.0
@@ -35,4 +41,3 @@ sympy==1.14.0
 tqdm==4.67.1
 typing_extensions==4.15.0
 urllib3==2.6.3
-pyinstaller==6.18.0
