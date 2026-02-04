@@ -238,14 +238,13 @@ class ActiveWindowOCRText:
                 except Exception as e:
                     logger.warning(f"[OCRText] Intel CPU detected, but OpenVINO failed to load: {e}")        
 
-        # try:
-        #     self._reader_cache = RapidOCR(params={"Global.use_cls": False,})
-        #     logger.info("[OCRText] Loaded Engine: ONNX Runtime")
-        #     return self._reader_cache
-        # except Exception as e:
-        #     logger.exception(f"[OCRText] ONNX Runtime backend failed to load: {e}")
-            #raise RuntimeError(f"No suitable RapidOCR backend found. {e}")
-            
+        try:
+            self._reader_cache = RapidOCR(params={"Global.use_cls": False,})
+            logger.info("[OCRText] Loaded Engine: ONNX Runtime")
+            return self._reader_cache
+        except Exception as e:
+            logger.exception(f"[OCRText] ONNX Runtime backend failed to load: {e}")
+            raise RuntimeError(f"No suitable RapidOCR backend found. {e}")            
 
         
     def run_ocr(self, min_conf=0.8, save_box_info=False, save_conf_info=False):
@@ -290,7 +289,8 @@ class ActiveWindowOCRText:
             #     json_data["box"] = [[float(p[0]), float(p[1])] for p in box]
             json_output['data'].append(json_data)
 
-
+        print("json_output")
+        print(json_output)
         try:                       
             payload = {
                 'screenshot_id': self.screenshot_id,
@@ -299,7 +299,7 @@ class ActiveWindowOCRText:
 
             response = requests.post(self.server_url, json=payload)
             response.raise_for_status() # Raise an exception for bad status codes
-            logger.info(f"Upload response time_specific => {response.json()}")
+            logger.info(f"Upload response run_ocr => {response.json()}")
 
         except requests.exceptions.RequestException as req_e:
             logger.error(f"Error during API request: {req_e}")
@@ -309,9 +309,13 @@ class ActiveWindowOCRText:
         # return json.dumps(json_output)
 
 if __name__ == "__main__":
-    ocr = ActiveWindowOCRText(warmup=True)
-    # ocr.run_ocr(img_path=r"C:\Users\User\Pictures\ss_test.PNG")    
-    result = ocr.run_ocr(img_path=r"ch.png")    
+    server_url = ""
+    screenshot_id = ""
+    image_path = "ch.png"
+    ActiveWindowOCRText(server_url, screenshot_id, image_path, warmup=True).run_ocr()
+    # ocr = ActiveWindowOCRText(server_url, screenshot_id, warmup=True)
+    # # ocr.run_ocr(img_path=r"C:\Users\User\Pictures\ss_test.PNG")    
+    # result = ocr.run_ocr(img_path=r"ch.png")    
 
-    print(result)
+    # print(result)
     

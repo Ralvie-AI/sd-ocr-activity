@@ -1,8 +1,5 @@
-build:
-	poetry install
-
 package:
-	pyinstaller sd-ocr-activity.spec --clean --noconfirm
+	pyinstaller sd-ocr-activity.spec 
 
 clean:
 	rm -rf build dist

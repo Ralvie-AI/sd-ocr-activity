@@ -1,34 +1,35 @@
+from PyInstaller.utils.hooks import collect_data_files, collect_submodules
+
 block_cipher = None
 
-a = Analysis(['sd_pixel_engine/__main__.py'],
-             pathex=[],
-             binaries=None,
-             datas=None,
-             hiddenimports=[],
-             hookspath=[],
-             runtime_hooks=[],
-             excludes=[],
-             win_no_prefer_redirects=False,
-             win_private_assemblies=False,
-             cipher=block_cipher)
+datas = collect_data_files("rapidocr") + collect_data_files("openvino")
+hiddenimports = collect_submodules("rapidocr") + collect_submodules("openvino")
 
-pyz = PYZ(a.pure, a.zipped_data,
-             cipher=block_cipher)
+a = Analysis(
+    ['sd_ocr_activity/__main__.py'],
+    pathex=[],
+    binaries=None,
+    datas=datas,
+    hiddenimports=hiddenimports,
+    hookspath=[],
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher
+)
 
-exe = EXE(pyz,
-          a.scripts,
-          exclude_binaries=True,
-          name='sd-pixel-engine',
-          contents_directory=".",
-          debug=False,
-          strip=False,
-          upx=True,
-          console=True )
-          
-coll = COLLECT(exe,
-               a.binaries,
-               a.zipfiles,
-               a.datas,
-               strip=False,
-               upx=True,
-               name='sd-pixel-engine')
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
+exe = EXE(
+    pyz,
+    a.scripts,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    name='sd-ocr-activity',
+    debug=False,
+    strip=False,
+    upx=True,
+    console=True
+)
