@@ -1,5 +1,5 @@
 package:
-	pyinstaller sd-ocr-activity.spec 
+	pyinstaller sd-ocr-activity.spec --clean --noconfirm 
 
 clean:
 	rm -rf build dist
