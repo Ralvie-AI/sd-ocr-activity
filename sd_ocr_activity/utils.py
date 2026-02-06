@@ -178,7 +178,36 @@ def setup_logging(
 
     sys.excepthook = excepthook
 
+
 def _create_file_handler(
+    name, testing=False, log_json=False
+) -> logging.Handler:
+    log_dir = get_log_dir(name)
+
+    global log_file_path
+
+    file_ext = ".log.json" if log_json else ".log"
+
+    # Daily log file instead of per-run timestamp
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    log_name = f"{name}_{'testing_' if testing else ''}{date_str}{file_ext}"
+
+    log_file_path = os.path.join(log_dir, log_name)
+
+    # Append mode + rotation
+    fh = RotatingFileHandler(
+        log_file_path,
+        mode="a",
+        maxBytes=10 * 1024 * 1024,
+        backupCount=3,
+    )
+
+    fh.setFormatter(_create_human_formatter())
+
+    return fh
+
+
+def _create_file_handler_old(
     name, testing=False, log_json=False
 ) -> logging.Handler:  
     """
