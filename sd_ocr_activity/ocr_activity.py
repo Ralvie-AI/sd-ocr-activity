@@ -4,7 +4,6 @@ import cv2
 import json
 import platform
 import importlib.util
-import gc
 import os
 import time
 import re
@@ -251,6 +250,10 @@ class ActiveWindowOCRText:
             logger.exception(f"[OCRText] ONNX Runtime backend failed to load: {e}")
             raise RuntimeError(f"No suitable RapidOCR backend found. {e}")            
 
+    def save_30_percent_image(self, crop_img):
+        tmp_file_path, ext = os.path.splitext(self.image_path)
+        screenshot_file = f"{tmp_file_path}-30.png"
+        cv2.imwrite(screenshot_file, crop_img)
         
     def run_ocr(self, min_conf=0.8, save_box_info=False, save_conf_info=False):
 
@@ -264,16 +267,23 @@ class ActiveWindowOCRText:
 
         #_t_ocr_mode = time.perf_counter()
 
+        # add to get 30% of image from top
+        h,w = img.shape[:2]
+        crop_img = img[0:int(h * 0.3), 0:w]
+
+        # Comment for debugging
+        # self.save_30_percent_image(crop_img)
+
         reader = self.get_cached_reader() # get RapidOCR reader
         output = None
         try:
-            output = reader(img)
+            output = reader(crop_img)
         except Exception:
-            #logger.exception("[OCRText] reader(img) failed during fullscreen_ocr")
+            logger.exception("[OCRText] reader(img) failed during fullscreen_ocr")
             raise
 
         if not output:
-            #logger.info("[OCRText] No text detected")
+            logger.info("[OCRText] No text detected")
             return {"data": []}
         
         t_ocr_total = time.perf_counter() - t_init
@@ -320,7 +330,7 @@ class ActiveWindowOCRText:
 if __name__ == "__main__":
     server_url = ""
     screenshot_id = ""
-    image_path = "ch.png"
+    image_path = "jp.png"
     ActiveWindowOCRText(server_url, screenshot_id, image_path, warmup=True).run_ocr()
     # ocr = ActiveWindowOCRText(server_url, screenshot_id, warmup=True)
     # # ocr.run_ocr(img_path=r"C:\Users\User\Pictures\ss_test.PNG")    
