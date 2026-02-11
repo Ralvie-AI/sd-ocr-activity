@@ -13,6 +13,7 @@ import logging
 import pyopencl as cl
 import requests
 
+
 os.environ.pop('HTTP_PROXY', None)
 os.environ.pop('HTTPS_PROXY', None)
 
@@ -202,7 +203,7 @@ class ActiveWindowOCRText:
         #logger.info("[OCRText] Initializing RapidOCR reader")
 
         try:
-            from rapidocr import RapidOCR, EngineType, LangDet
+            from rapidocr import EngineType, LangDet, ModelType, OCRVersion, RapidOCR
         except Exception as e:
             #logger.exception(f"[OCRText] Failed to import RapidOCR: {e}")
             raise RuntimeError(f"No suitable RapidOCR backend found. {e}")
@@ -215,6 +216,7 @@ class ActiveWindowOCRText:
             if "DmlExecutionProvider" in providers:
                 try:
                     self._reader_cache = RapidOCR(params={"EngineConfig.onnxruntime.use_dml": True,"Global.use_cls": False,
+                                                          "Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, "Rec.lang_type": LangDet.CH, "Rec.ocr_version": OCRVersion.PPOCRV5,
                                                           })
                     print(f"[OCRText] Loaded Engine: ONNX Runtime DirectML (GPU)")
                     return self._reader_cache
@@ -231,7 +233,8 @@ class ActiveWindowOCRText:
                 try:
                     self._reader_cache = RapidOCR(params={
                         "Det.engine_type": EngineType.OPENVINO, "Cls.engine_type": EngineType.OPENVINO, "Rec.engine_type": EngineType.OPENVINO,
-                        "Global.use_cls": False,"Det.device_name": "AUTO", "Cls.device_name": "AUTO","Rec.device_name": "AUTO"
+                        "Global.use_cls": False,"Det.device_name": "AUTO", "Cls.device_name": "AUTO","Rec.device_name": "AUTO",
+                        "Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, "Rec.lang_type": LangDet.CH, "Rec.ocr_version": OCRVersion.PPOCRV5
                     })
                     logger.info("[OCRText] Loaded Engine: OpenVINO (Intel CPU)")
                     return self._reader_cache
@@ -239,7 +242,9 @@ class ActiveWindowOCRText:
                     logger.warning(f"[OCRText] Intel CPU detected, but OpenVINO failed to load: {e}")        
 
         try:
-            self._reader_cache = RapidOCR(params={"Global.use_cls": False,})
+            self._reader_cache = RapidOCR(params={"Global.use_cls": False,
+                                                  "Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, "Rec.lang_type": LangDet.CH, "Rec.ocr_version": OCRVersion.PPOCRV5
+                                                  })
             logger.info("[OCRText] Loaded Engine: ONNX Runtime")
             return self._reader_cache
         except Exception as e:
@@ -291,6 +296,10 @@ class ActiveWindowOCRText:
 
         print("json_output")
         print(json_output)
+
+        # with open('data.json', 'w', encoding='utf-8') as f:
+        #     json.dump(json_output, f, ensure_ascii=False)
+            
         try:                       
             payload = {
                 'screenshot_id': self.screenshot_id,
