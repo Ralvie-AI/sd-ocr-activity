@@ -1,14 +1,15 @@
 
-import numpy as np
-import cv2
+
 import json
 import platform
-import importlib.util
 import os
 import time
 import re
 import logging
+import importlib.util
 
+import numpy as np
+import cv2
 import pyopencl as cl
 import requests
 
@@ -53,7 +54,10 @@ class ActiveWindowOCRText:
 
 
     def use_directml(self) -> bool:
-        """ Detect if system has GPU for DirectML acceleration. - NVIDIA GPUs are allowed. - Intel GPUs are not used for DirectML (prefer CPU). - AMD GPUs are allowed unless they match a deny-list of older/weak architectures."""
+        """ Detect if system has GPU for DirectML acceleration. 
+        - NVIDIA GPUs are allowed. 
+        - Intel GPUs are not used for DirectML (prefer CPU). 
+        - AMD GPUs are allowed unless they match a deny-list of older/weak architectures."""
 
         try:    
             active_gpus = []  
@@ -63,7 +67,7 @@ class ActiveWindowOCRText:
                 pass
 
             if not active_gpus:
-                #logger.warning("[OCRText] No GPU name detected")
+                logger.warning("[OCRText] No GPU name detected")
                 return False
 
             logger.info(f"[OCRText] Detected active GPU: {active_gpus}")
@@ -179,7 +183,7 @@ class ActiveWindowOCRText:
             return False
 
         except Exception:
-            #logger.exception("[OCRText] use_directml() failed")
+            logger.exception("[OCRText] use_directml() failed")
             return False
 
     def has_intel_cpu(self) -> bool:
@@ -215,7 +219,8 @@ class ActiveWindowOCRText:
             if "DmlExecutionProvider" in providers:
                 try:
                     self._reader_cache = RapidOCR(params={"EngineConfig.onnxruntime.use_dml": True,"Global.use_cls": False,
-                                                          "Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, "Rec.lang_type": LangDet.CH, "Rec.ocr_version": OCRVersion.PPOCRV5,
+                                                          "Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, 
+                                                          "Rec.lang_type": LangDet.CH, "Rec.ocr_version": OCRVersion.PPOCRV5,
                                                           })
                     print(f"[OCRText] Loaded Engine: ONNX Runtime DirectML (GPU)")
                     return self._reader_cache
