@@ -1,5 +1,3 @@
-
-
 import json
 import platform
 import os
@@ -219,8 +217,7 @@ class ActiveWindowOCRText:
             if "DmlExecutionProvider" in providers:
                 try:
                     self._reader_cache = RapidOCR(params={"EngineConfig.onnxruntime.use_dml": True,"Global.use_cls": False,
-                                                          "Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, 
-                                                          "Rec.lang_type": LangDet.CH, "Rec.ocr_version": OCRVersion.PPOCRV5,
+                                                          #"Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, "Rec.lang_type": LangDet.CH, "Rec.ocr_version": OCRVersion.PPOCRV5,
                                                           })
                     print(f"[OCRText] Loaded Engine: ONNX Runtime DirectML (GPU)")
                     return self._reader_cache
@@ -238,7 +235,7 @@ class ActiveWindowOCRText:
                     self._reader_cache = RapidOCR(params={
                         "Det.engine_type": EngineType.OPENVINO, "Cls.engine_type": EngineType.OPENVINO, "Rec.engine_type": EngineType.OPENVINO,
                         "Global.use_cls": False,"Det.device_name": "AUTO", "Cls.device_name": "AUTO","Rec.device_name": "AUTO",
-                        "Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, "Rec.lang_type": LangDet.CH, "Rec.ocr_version": OCRVersion.PPOCRV5
+                        #"Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, "Rec.lang_type": LangDet.CH, "Rec.ocr_version": OCRVersion.PPOCRV5
                     })
                     logger.info("[OCRText] Loaded Engine: OpenVINO (Intel CPU)")
                     return self._reader_cache
@@ -247,7 +244,7 @@ class ActiveWindowOCRText:
 
         try:
             self._reader_cache = RapidOCR(params={"Global.use_cls": False,
-                                                  "Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, "Rec.lang_type": LangDet.CH, "Rec.ocr_version": OCRVersion.PPOCRV5
+                                                  #"Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, "Rec.lang_type": LangDet.CH, "Rec.ocr_version": OCRVersion.PPOCRV5
                                                   })
             logger.info("[OCRText] Loaded Engine: ONNX Runtime")
             return self._reader_cache
