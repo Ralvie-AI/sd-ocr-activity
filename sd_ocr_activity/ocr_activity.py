@@ -269,9 +269,8 @@ class ActiveWindowOCRText:
 
         #_t_ocr_mode = time.perf_counter()
 
-        # add to get 30% of image from top
-        h,w = img.shape[:2]
-        crop_img = img[0:int(h * 0.3), 0:w]
+        
+        h,w = img.shape[:2]        
 
         # Comment for debugging
         # self.save_30_percent_image(crop_img)
@@ -279,7 +278,12 @@ class ActiveWindowOCRText:
         reader = self.get_cached_reader() # get RapidOCR reader
         output = None
         try:
-            output = reader(crop_img)
+            if h <= 100:     
+                output = reader(img)
+            else:
+                # add to get 30% of image from top
+                crop_img = img[0:int(h * 0.3), 0:w]
+                output = reader(crop_img)
         except Exception:
             logger.exception("[OCRText] reader(img) failed during fullscreen_ocr")
             raise
