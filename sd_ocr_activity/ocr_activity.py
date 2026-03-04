@@ -217,7 +217,8 @@ class ActiveWindowOCRText:
             if "DmlExecutionProvider" in providers:
                 try:
                     self._reader_cache = RapidOCR(params={"EngineConfig.onnxruntime.use_dml": True,"Global.use_cls": False,
-                                                          #"Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, "Rec.lang_type": LangDet.CH, "Rec.ocr_version": OCRVersion.PPOCRV5,
+                                                          "Rec.ocr_version": OCRVersion.PPOCRV5,
+                                                          #"Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, "Rec.lang_type": LangDet.CH, 
                                                           })
                     print(f"[OCRText] Loaded Engine: ONNX Runtime DirectML (GPU)")
                     return self._reader_cache
@@ -235,7 +236,8 @@ class ActiveWindowOCRText:
                     self._reader_cache = RapidOCR(params={
                         "Det.engine_type": EngineType.OPENVINO, "Cls.engine_type": EngineType.OPENVINO, "Rec.engine_type": EngineType.OPENVINO,
                         "Global.use_cls": False,"Det.device_name": "AUTO", "Cls.device_name": "AUTO","Rec.device_name": "AUTO",
-                        #"Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, "Rec.lang_type": LangDet.CH, "Rec.ocr_version": OCRVersion.PPOCRV5
+                        "Rec.ocr_version": OCRVersion.PPOCRV5,
+                        # "Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, "Rec.lang_type": LangDet.CH, "Rec.ocr_version": OCRVersion.PPOCRV5
                     })
                     logger.info("[OCRText] Loaded Engine: OpenVINO (Intel CPU)")
                     return self._reader_cache
@@ -244,6 +246,7 @@ class ActiveWindowOCRText:
 
         try:
             self._reader_cache = RapidOCR(params={"Global.use_cls": False,
+                                                  "Rec.ocr_version": OCRVersion.PPOCRV5,
                                                   #"Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, "Rec.lang_type": LangDet.CH, "Rec.ocr_version": OCRVersion.PPOCRV5
                                                   })
             logger.info("[OCRText] Loaded Engine: ONNX Runtime")
@@ -257,7 +260,7 @@ class ActiveWindowOCRText:
         screenshot_file = f"{tmp_file_path}-30.png"
         cv2.imwrite(screenshot_file, crop_img)
         
-    def run_ocr(self, min_conf=0.8, save_box_info=False, save_conf_info=False):
+    def run_ocr(self, min_conf=0.87, save_box_info=False, save_conf_info=False):
 
         # Main OCR execution function
         t_init = time.perf_counter()
@@ -318,6 +321,9 @@ class ActiveWindowOCRText:
             }
 
             for box, text, conf in zip(output.boxes, output.txts, output.scores):
+                # print("conf ", conf)
+                # print("text ", text)
+                # print("box", box)
                 if conf < min_conf:
                     continue
                 json_data = {"text": text}
