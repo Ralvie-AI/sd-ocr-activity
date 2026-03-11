@@ -285,7 +285,9 @@ class ActiveWindowOCRText:
                 output = reader(img)
             else:
                 # add to get 30% of image from top
-                crop_img = img[0:int(h * 0.3), 0:w]
+                # crop_img = img[0:int(h * 0.3), 0:w]
+                # exlude top 10 % percent of the height of image
+                crop_img = img[int(h * 0.1):int(h * 0.4), 0:w]
                 output = reader(crop_img)
         except Exception:
             logger.exception("[OCRText] reader(img) failed during fullscreen_ocr")
