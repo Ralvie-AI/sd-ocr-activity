@@ -5,6 +5,7 @@ import time
 import re
 import logging
 import importlib.util
+import urllib3
 
 import numpy as np
 import cv2
@@ -220,10 +221,15 @@ class ActiveWindowOCRText:
                                                           "Rec.ocr_version": OCRVersion.PPOCRV5,
                                                           #"Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, "Rec.lang_type": LangDet.CH, 
                                                           })
-                    print(f"[OCRText] Loaded Engine: ONNX Runtime DirectML (GPU)")
+                    logger.info(f"[OCRText] Loaded Engine: ONNX Runtime DirectML (GPU)")
                     return self._reader_cache
+                
+                except (requests.exceptions.RequestException, urllib3.exceptions.HTTPError,
+                                    TimeoutError) as e:
+                    self._reader_cache = RapidOCR(params={"EngineConfig.onnxruntime.use_dml": True,"Global.use_cls": False,})
+                    logger.info(f"[OCRText] Loaded Engine: ONNX Runtime DirectML (GPU)")
+                    return self._reader_cache                    
                 except Exception as e:
-                    # print(e)
                     logger.warning(f"[OCRText] GPU detected, but DirectML failed to load: {e}")
             else:
                 # print('DmlExecutionProvider not found')
@@ -241,6 +247,15 @@ class ActiveWindowOCRText:
                     })
                     logger.info("[OCRText] Loaded Engine: OpenVINO (Intel CPU)")
                     return self._reader_cache
+                except (requests.exceptions.RequestException, urllib3.exceptions.HTTPError,
+                                    TimeoutError) as e:
+                    self._reader_cache = RapidOCR(params={
+                        "Det.engine_type": EngineType.OPENVINO, "Cls.engine_type": EngineType.OPENVINO, "Rec.engine_type": EngineType.OPENVINO,
+                        "Global.use_cls": False,"Det.device_name": "AUTO", "Cls.device_name": "AUTO","Rec.device_name": "AUTO",                       
+                    })
+                    logger.info("[OCRText] Loaded Engine: OpenVINO (Intel CPU)")
+                    return self._reader_cache
+                
                 except Exception as e:
                     logger.warning(f"[OCRText] Intel CPU detected, but OpenVINO failed to load: {e}")        
 
@@ -249,6 +264,12 @@ class ActiveWindowOCRText:
                                                   "Rec.ocr_version": OCRVersion.PPOCRV5,
                                                   #"Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, "Rec.lang_type": LangDet.CH, "Rec.ocr_version": OCRVersion.PPOCRV5
                                                   })
+            logger.info("[OCRText] Loaded Engine: ONNX Runtime")
+            return self._reader_cache
+        except (requests.exceptions.RequestException,
+                urllib3.exceptions.HTTPError,
+                TimeoutError) as e:
+            self._reader_cache = RapidOCR(params={"Global.use_cls": False,})
             logger.info("[OCRText] Loaded Engine: ONNX Runtime")
             return self._reader_cache
         except Exception as e:
