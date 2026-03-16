@@ -327,7 +327,7 @@ class ActiveWindowOCRText:
                 }          
                 response = requests.post(self.server_url, json=payload)
                 response.raise_for_status() # Raise an exception for bad status codes
-                logger.info(f"Upload response run_ocr => {response.json()}")
+                # logger.info(f"Upload response run_ocr => {response.json()}")
             except requests.exceptions.RequestException as req_e:
                 logger.error(f"Error during API request: {req_e}")
             except Exception as e:
@@ -370,7 +370,7 @@ class ActiveWindowOCRText:
 
                 response = requests.post(self.server_url, json=payload)
                 response.raise_for_status() # Raise an exception for bad status codes
-                logger.info(f"Upload response run_ocr => {response.json()}")
+                # logger.info(f"Upload response run_ocr => {response.json()}")
 
             except requests.exceptions.RequestException as req_e:
                 logger.error(f"Error during API request: {req_e}")
