@@ -281,7 +281,7 @@ class ActiveWindowOCRText:
         screenshot_file = f"{tmp_file_path}-30.png"
         cv2.imwrite(screenshot_file, crop_img)
         
-    def run_ocr(self, min_conf=0.87, save_box_info=False, save_conf_info=False):
+    def run_ocr(self, min_conf=0.9, save_box_info=False, save_conf_info=False):
 
         # Main OCR execution function
         t_init = time.perf_counter()
