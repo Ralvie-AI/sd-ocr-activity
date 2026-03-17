@@ -1,5 +1,9 @@
-package:
-	pyinstaller sd-ocr-activity.spec --clean --noconfirm 
+SHELL := cmd.exe
+PYTHON := .\venv3124\Scripts\python.exe
+
+package: 
+	call scripts\package.bat
+	$(PYTHON) scripts\test.py
 
 clean:
 	rm -rf build dist
