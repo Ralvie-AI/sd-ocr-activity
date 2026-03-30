@@ -1,9 +1,9 @@
-SHELL := cmd.exe
-PYTHON := .\venv3124\Scripts\python.exe
+
+build:
+	poetry install 
 
 package: 
-	call scripts\package.bat
-	$(PYTHON) scripts\test.py
+	pyinstaller sd-ocr-activity.spec --clean --noconfirm
 
 clean:
 	rm -rf build dist
