@@ -280,6 +280,21 @@ class ActiveWindowOCRText:
         tmp_file_path, ext = os.path.splitext(self.image_path)
         screenshot_file = f"{tmp_file_path}-30.png"
         cv2.imwrite(screenshot_file, crop_img)
+
+
+    def _send_ocr_result(self, json_output):
+        """Send OCR results to server with error handling."""
+        try:
+            payload = {
+                'screenshot_id': self.screenshot_id,
+                'ocr_text': json.dumps(json_output)
+            }
+            response = requests.post(self.server_url, json=payload)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as req_e:
+            logger.error(f"Error during API request: {req_e}")
+        except Exception as e:
+            logger.error(f"Error sending OCR result: {e}")
         
     def run_ocr(self, min_conf=0.9, save_box_info=False, save_conf_info=False):
 
@@ -290,7 +305,6 @@ class ActiveWindowOCRText:
         if img is None:
             raise ValueError("Failed to load image")
         #logger.info(f"[TIMING] Reading the image: {time.perf_counter() - t_init:.3f}s")
-
         #_t_ocr_mode = time.perf_counter()
 
         
@@ -316,23 +330,8 @@ class ActiveWindowOCRText:
 
         if not output:
             logger.info("[OCRText] No text detected")
-            json_output = {"data": [{"text": "No text detected"}]}
-            # rr = json.dumps(json_output)
-            # print(type(rr))
-            # print(rr)
-            try:                       
-                payload = {
-                    'screenshot_id': self.screenshot_id,
-                    'ocr_text': json.dumps(json_output)
-                }          
-                response = requests.post(self.server_url, json=payload)
-                response.raise_for_status() # Raise an exception for bad status codes
-                # logger.info(f"Upload response run_ocr => {response.json()}")
-            except requests.exceptions.RequestException as req_e:
-                logger.error(f"Error during API request: {req_e}")
-            except Exception as e:
-                logger.error(f"Error in scheduled job: {e}")
-        
+            json_output = {"data": [{"text": "No text detected"}]} 
+            self._send_ocr_result(json_output)        
         else:
 
             t_ocr_total = time.perf_counter() - t_init
@@ -343,10 +342,7 @@ class ActiveWindowOCRText:
                 "data": []
             }
 
-            for box, text, conf in zip(output.boxes, output.txts, output.scores):
-                # print("conf ", conf)
-                # print("text ", text)
-                # print("box", box)
+            for box, text, conf in zip(output.boxes, output.txts, output.scores):               
                 if conf < min_conf:
                     continue
                 json_data = {"text": text}
@@ -356,27 +352,11 @@ class ActiveWindowOCRText:
                 #     json_data["box"] = [[float(p[0]), float(p[1])] for p in box]
                 json_output['data'].append(json_data)
 
-            print("json_output")
-            print(json_output)
 
             # with open('data.json', 'w', encoding='utf-8') as f:
             #     json.dump(json_output, f, ensure_ascii=False)
-                
-            try:                       
-                payload = {
-                    'screenshot_id': self.screenshot_id,
-                    'ocr_text': json.dumps(json_output)
-                }          
 
-                response = requests.post(self.server_url, json=payload)
-                response.raise_for_status() # Raise an exception for bad status codes
-                # logger.info(f"Upload response run_ocr => {response.json()}")
-
-            except requests.exceptions.RequestException as req_e:
-                logger.error(f"Error during API request: {req_e}")
-            except Exception as e:
-                logger.error(f"Error in scheduled job: {e}")
-
+            self._send_ocr_result(json_output)
 
 if __name__ == "__main__":
     server_url = ""
