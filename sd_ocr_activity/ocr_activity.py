@@ -1,3 +1,4 @@
+import gc
 import json
 import platform
 import os
@@ -289,8 +290,8 @@ class ActiveWindowOCRText:
                 'screenshot_id': self.screenshot_id,
                 'ocr_text': json.dumps(json_output)
             }
-            response = requests.post(self.server_url, json=payload)
-            response.raise_for_status()
+            with requests.post(self.server_url, json=payload) as response:
+                response.raise_for_status()
         except requests.exceptions.RequestException as req_e:
             logger.error(f"Error during API request: {req_e}")
         except Exception as e:
@@ -301,62 +302,71 @@ class ActiveWindowOCRText:
         # Main OCR execution function
         t_init = time.perf_counter()
 
-        img = cv2.imread(self.image_path, cv2.IMREAD_COLOR)
-        if img is None:
-            raise ValueError("Failed to load image")
-        #logger.info(f"[TIMING] Reading the image: {time.perf_counter() - t_init:.3f}s")
-        #_t_ocr_mode = time.perf_counter()
-
-        
-        h,w = img.shape[:2]        
-
-        # Comment for debugging
-        # self.save_30_percent_image(crop_img)
-
-        reader = self.get_cached_reader() # get RapidOCR reader
+        img = None
+        crop_img = None
         output = None
         try:
-            if h <= 100:     
-                output = reader(img)
+            img = cv2.imread(self.image_path, cv2.IMREAD_COLOR)
+            if img is None:
+                raise ValueError("Failed to load image")
+            #logger.info(f"[TIMING] Reading the image: {time.perf_counter() - t_init:.3f}s")
+            #_t_ocr_mode = time.perf_counter()
+
+            
+            h,w = img.shape[:2]        
+
+            # Comment for debugging
+            # self.save_30_percent_image(crop_img)
+
+            reader = self.get_cached_reader() # get RapidOCR reader
+            try:
+                if h <= 100:     
+                    output = reader(img)
+                else:
+                    # add to get 30% of image from top
+                    # crop_img = img[0:int(h * 0.3), 0:w]
+                    # exlude top 10 % percent of the height of image
+                    crop_img = img[int(h * 0.1):int(h * 0.4), 0:w]
+                    output = reader(crop_img)
+            except Exception:
+                logger.exception("[OCRText] reader(img) failed during fullscreen_ocr")
+                raise
+
+            if not output:
+                logger.info("[OCRText] No text detected")
+                json_output = {"data": [{"text": "No text detected"}]} 
+                self._send_ocr_result(json_output)        
             else:
-                # add to get 30% of image from top
-                # crop_img = img[0:int(h * 0.3), 0:w]
-                # exlude top 10 % percent of the height of image
-                crop_img = img[int(h * 0.1):int(h * 0.4), 0:w]
-                output = reader(crop_img)
-        except Exception:
-            logger.exception("[OCRText] reader(img) failed during fullscreen_ocr")
-            raise
 
-        if not output:
-            logger.info("[OCRText] No text detected")
-            json_output = {"data": [{"text": "No text detected"}]} 
-            self._send_ocr_result(json_output)        
-        else:
+                t_ocr_total = time.perf_counter() - t_init
+                logger.info(f"[OCRText] run_ocr time: {t_ocr_total:.2f}s")
+                #logger.info(f"[TIMING] ocr_execution: {time.perf_counter() - _t_ocr_mode:.3f}s")
 
-            t_ocr_total = time.perf_counter() - t_init
-            logger.info(f"[OCRText] run_ocr time: {t_ocr_total:.2f}s")
-            #logger.info(f"[TIMING] ocr_execution: {time.perf_counter() - _t_ocr_mode:.3f}s")
+                json_output = {
+                    "data": []
+                }
 
-            json_output = {
-                "data": []
-            }
-
-            for box, text, conf in zip(output.boxes, output.txts, output.scores):               
-                if conf < min_conf:
-                    continue
-                json_data = {"text": text}
-                # if save_conf_info:
-                #     json_data["confidence"] = float(conf)
-                # if save_box_info:
-                #     json_data["box"] = [[float(p[0]), float(p[1])] for p in box]
-                json_output['data'].append(json_data)
+                for box, text, conf in zip(output.boxes, output.txts, output.scores):               
+                    if conf < min_conf:
+                        continue
+                    json_data = {"text": text}
+                    # if save_conf_info:
+                    #     json_data["confidence"] = float(conf)
+                    # if save_box_info:
+                    #     json_data["box"] = [[float(p[0]), float(p[1])] for p in box]
+                    json_output['data'].append(json_data)
 
 
-            # with open('data.json', 'w', encoding='utf-8') as f:
-            #     json.dump(json_output, f, ensure_ascii=False)
+                # with open('data.json', 'w', encoding='utf-8') as f:
+                #     json.dump(json_output, f, ensure_ascii=False)
 
-            self._send_ocr_result(json_output)
+                self._send_ocr_result(json_output)
+        finally:
+            # Explicitly free large image arrays to prevent memory leaks
+            del img
+            del crop_img
+            del output
+            gc.collect()
 
 if __name__ == "__main__":
     server_url = ""
