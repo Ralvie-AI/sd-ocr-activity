@@ -13,6 +13,8 @@ import cv2
 import pyopencl as cl
 import requests
 
+from sd_ocr_activity.const import CERT
+
 
 os.environ.pop('HTTP_PROXY', None)
 os.environ.pop('HTTPS_PROXY', None)
@@ -215,7 +217,6 @@ class ActiveWindowOCRText:
         if self.use_directml():
             import onnxruntime as ort
             providers = ort.get_available_providers()
-            print(f"[OCRText] Available providers: {providers}")
             if "DmlExecutionProvider" in providers:
                 try:
                     self._reader_cache = RapidOCR(params={"EngineConfig.onnxruntime.use_dml": True,"Global.use_cls": False,
@@ -290,7 +291,7 @@ class ActiveWindowOCRText:
                 'screenshot_id': self.screenshot_id,
                 'ocr_text': json.dumps(json_output)
             }
-            with requests.post(self.server_url, json=payload) as response:
+            with requests.post(self.server_url, json=payload, verify=str(CERT), ) as response:
                 response.raise_for_status()
         except requests.exceptions.RequestException as req_e:
             logger.error(f"Error during API request: {req_e}")
