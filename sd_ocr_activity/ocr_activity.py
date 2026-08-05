@@ -40,7 +40,6 @@ class ActiveWindowOCRText:
             cv2.putText(warmup_img, "Warmup", (10, 150),cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0, 0, 0), 3)
             _ = reader(warmup_img)
             del warmup_img
-            #print("[OCRText] Warmup completed")
         except Exception:
             #logger.exception("[OCRText] Warmup failed")
             raise
@@ -234,7 +233,6 @@ class ActiveWindowOCRText:
                 except Exception as e:
                     logger.warning(f"[OCRText] GPU detected, but DirectML failed to load: {e}")
             else:
-                # print('DmlExecutionProvider not found')
                 logger.warning(f"[OCRText] Cannot find DmlExecutionProvider")
 
         # #  # --- Intel (OpenVINO) ---
@@ -266,13 +264,11 @@ class ActiveWindowOCRText:
                                                   "Rec.ocr_version": OCRVersion.PPOCRV5,
                                                   #"Det.lang_type": LangDet.MULTI, "Det.ocr_version": OCRVersion.PPOCRV4, "Rec.lang_type": LangDet.CH, "Rec.ocr_version": OCRVersion.PPOCRV5
                                                   })
-            logger.info("[OCRText] Loaded Engine: ONNX Runtime")
             return self._reader_cache
         except (requests.exceptions.RequestException,
                 urllib3.exceptions.HTTPError,
                 TimeoutError) as e:
             self._reader_cache = RapidOCR(params={"Global.use_cls": False,})
-            logger.info("[OCRText] Loaded Engine: ONNX Runtime")
             return self._reader_cache
         except Exception as e:
             logger.exception(f"[OCRText] ONNX Runtime backend failed to load: {e}")
