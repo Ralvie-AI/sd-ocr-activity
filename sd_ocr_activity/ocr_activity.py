@@ -13,7 +13,7 @@ import cv2
 import pyopencl as cl
 import requests
 
-from sd_ocr_activity.const import CERT
+from sd_ocr_activity.const import CERT_FILE
 
 
 os.environ.pop('HTTP_PROXY', None)
@@ -287,7 +287,7 @@ class ActiveWindowOCRText:
                 'screenshot_id': self.screenshot_id,
                 'ocr_text': json.dumps(json_output)
             }
-            with requests.post(self.server_url, json=payload, verify=str(CERT), ) as response:
+            with requests.post(self.server_url, json=payload, verify=str(CERT_FILE), ) as response:
                 response.raise_for_status()
         except requests.exceptions.RequestException as req_e:
             logger.error(f"Error during API request: {req_e}")
