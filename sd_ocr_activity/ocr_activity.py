@@ -321,7 +321,10 @@ class ActiveWindowOCRText:
             # Calculate total multi-threaded CPU usage across all cores
             end_cpu_time = process.cpu_times()
             total_cpu_seconds = (end_cpu_time.user - start_cpu_time.user) + (end_cpu_time.system - start_cpu_time.system)
-            cpu_usage_pct = (total_cpu_seconds / elapsed_time * 100) if elapsed_time > 0 else 0.0
+            # cpu_usage_pct = (total_cpu_seconds / elapsed_time * 100) if elapsed_time > 0 else 0.0
+            
+            num_cores = psutil.cpu_count(logical=True) or 1
+            cpu_usage_pct = ((total_cpu_seconds / elapsed_time * 100) / num_cores) if elapsed_time > 0 else 0.0
 
             # Print / Log formatted metrics
             metrics_summary = (
