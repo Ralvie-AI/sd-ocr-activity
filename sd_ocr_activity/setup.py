@@ -12,6 +12,7 @@ extensions = [
     Extension("ocr_activity", ["ocr_activity.py"]),
     Extension("main", ["main.py"]),
     Extension("utils", ["utils.py"]),
+    Extension("systeminfo", ["systeminfo.py"]),
 ]
 
 

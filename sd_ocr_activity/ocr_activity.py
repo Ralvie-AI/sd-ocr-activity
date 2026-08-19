@@ -335,6 +335,7 @@ class ActiveWindowOCRText:
                 f"\nRAM Increase : {ram_increase_mb:.1f} MB"
                 f"\nGPU Usage    : {gpu_usage}"
                 f"\n----------------------"
+                f"\n"
             )
             # print(metrics_summary)
             logger.info(metrics_summary)
