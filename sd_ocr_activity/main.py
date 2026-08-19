@@ -6,6 +6,7 @@ from pathlib import Path
 from sd_ocr_activity.utils import setup_logging, get_log_dir
 from sd_ocr_activity.ocr_activity import ActiveWindowOCRText
 from sd_ocr_activity.systeminfo import get_system_info, print_system_info
+from sd_ocr_activity.resource_monitor import ResourceMonitor
 
 logger = logging.getLogger(__name__)
 
@@ -55,12 +56,26 @@ def main():
         system_info = get_system_info()
         print_system_info(system_info)
         
+    monitor = ResourceMonitor()
+    monitor.start()
+    try:            
+        ActiveWindowOCRText(
+            server_url=args.server_url,
+            image_path=args.image_path,
+            screenshot_id=args.screenshot_id
+        ).run_ocr()
+    finally:
+        usage = monitor.stop()
 
-    ActiveWindowOCRText(
-        server_url=args.server_url,
-        image_path=args.image_path,
-        screenshot_id=args.screenshot_id
-    ).run_ocr()    
+    metrics_summary = (
+        f"\n--- Resource Usage ---"
+        f"\nRuntime       : {usage.elapsed_seconds:.2f} s"
+        f"\nPeak CPU      : {usage.peak_cpu_percent:.1f}%"
+        f"\nPeak memory   : {usage.peak_memory_mb:.1f} MB"
+        f"\n----------------------"
+        f"\n"
+    )
+    logger.info(metrics_summary)
 
 
 if __name__ == '__main__':

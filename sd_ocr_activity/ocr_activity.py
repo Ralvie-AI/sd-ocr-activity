@@ -283,13 +283,13 @@ class ActiveWindowOCRText:
 
     def run_ocr(self, min_conf=0.9, save_box_info=False, save_conf_info=False):
         # ---------------- Profiler Initialization ----------------
-        process = psutil.Process(os.getpid())
+        # process = psutil.Process(os.getpid())
         
         # Prime CPU calculation & get baseline memory
-        process.cpu_percent(interval=None)
-        start_cpu_time = process.cpu_times()
-        ram_start_mb = process.memory_info().rss / (1024 * 1024)
-        t_init = time.perf_counter()
+        # process.cpu_percent(interval=None)
+        # start_cpu_time = process.cpu_times()
+        # ram_start_mb = process.memory_info().rss / (1024 * 1024)
+        # t_init = time.perf_counter()
 
         img = None
         crop_img = None
@@ -311,34 +311,34 @@ class ActiveWindowOCRText:
                 output = reader(crop_img)
 
             # Sample GPU usage immediately after inference
-            gpu_usage = get_current_gpu_usage()
+            # gpu_usage = get_current_gpu_usage()
 
-            # ---------------- Profiling Metrics ----------------
-            elapsed_time = time.perf_counter() - t_init
-            ram_end_mb = process.memory_info().rss / (1024 * 1024)
-            ram_increase_mb = max(0.0, ram_end_mb - ram_start_mb)
+            # # ---------------- Profiling Metrics ----------------
+            # elapsed_time = time.perf_counter() - t_init
+            # ram_end_mb = process.memory_info().rss / (1024 * 1024)
+            # ram_increase_mb = max(0.0, ram_end_mb - ram_start_mb)
 
-            # Calculate total multi-threaded CPU usage across all cores
-            end_cpu_time = process.cpu_times()
-            total_cpu_seconds = (end_cpu_time.user - start_cpu_time.user) + (end_cpu_time.system - start_cpu_time.system)
-            # cpu_usage_pct = (total_cpu_seconds / elapsed_time * 100) if elapsed_time > 0 else 0.0
+            # # Calculate total multi-threaded CPU usage across all cores
+            # end_cpu_time = process.cpu_times()
+            # total_cpu_seconds = (end_cpu_time.user - start_cpu_time.user) + (end_cpu_time.system - start_cpu_time.system)
+            # # cpu_usage_pct = (total_cpu_seconds / elapsed_time * 100) if elapsed_time > 0 else 0.0
             
-            num_cores = psutil.cpu_count(logical=True) or 1
-            cpu_usage_pct = ((total_cpu_seconds / elapsed_time * 100) / num_cores) if elapsed_time > 0 else 0.0
+            # num_cores = psutil.cpu_count(logical=True) or 1
+            # cpu_usage_pct = ((total_cpu_seconds / elapsed_time * 100) / num_cores) if elapsed_time > 0 else 0.0
 
-            # Print / Log formatted metrics
-            metrics_summary = (
-                f"\n--- Resource Usage ---"
-                f"\nRuntime      : {elapsed_time:.2f} s"
-                f"\nCPU Usage    : {cpu_usage_pct:.1f}%"
-                f"\nRAM Usage    : {ram_end_mb:.1f} MB"
-                f"\nRAM Increase : {ram_increase_mb:.1f} MB"
-                f"\nGPU Usage    : {gpu_usage}"
-                f"\n----------------------"
-                f"\n"
-            )
-            # print(metrics_summary)
-            logger.info(metrics_summary)
+            # # Print / Log formatted metrics
+            # metrics_summary = (
+            #     f"\n--- Resource Usage ---"
+            #     f"\nRuntime      : {elapsed_time:.2f} s"
+            #     f"\nCPU Usage    : {cpu_usage_pct:.1f}%"
+            #     f"\nRAM Usage    : {ram_end_mb:.1f} MB"
+            #     f"\nRAM Increase : {ram_increase_mb:.1f} MB"
+            #     f"\nGPU Usage    : {gpu_usage}"
+            #     f"\n----------------------"
+            #     f"\n"
+            # )
+            # # print(metrics_summary)
+            # logger.info(metrics_summary)
 
             # ---------------- OCR Output Preparation ----------------
             if not output:

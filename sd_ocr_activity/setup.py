@@ -13,6 +13,7 @@ extensions = [
     Extension("main", ["main.py"]),
     Extension("utils", ["utils.py"]),
     Extension("systeminfo", ["systeminfo.py"]),
+    Extension("resource_monitor", ["resource_monitor.py"]),    
 ]
 
 
