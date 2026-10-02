@@ -76,6 +76,12 @@ exe = EXE(
     upx=False,
     console=True,
     contents_directory=".",
+    upx_exclude=[
+        'vcruntime140.dll',
+        'ucrtbase.dll',
+        'python3.dll',
+        'python311.dll',
+    ],
 )
 
 # ---------------------------------------------------------
