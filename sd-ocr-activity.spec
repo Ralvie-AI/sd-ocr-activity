@@ -38,7 +38,8 @@ hiddenimports.extend(openvino_hiddenimports)
 
 block_cipher = None
 
-a = Analysis(["sd_ocr_activity/__main__.py"],
+a = Analysis(
+    ["sd_ocr_activity/__main__.py"],
     pathex=[],
     binaries=binaries,
     datas=datas,
